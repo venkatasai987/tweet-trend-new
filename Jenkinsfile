@@ -4,52 +4,61 @@ pipeline {
             label 'js-1'
         }
     }
-environment {
-    PATH = "/opt/apache-maven-3.9.12/bin:$PATH"
-	IMAGE_NAME = "venkatasai9876/ttrend"
-	VERSION = "2.0.${BUILD_NUMBER}"
-}
+    environment {
+        PATH = "/opt/apache-maven-3.9.12/bin:$PATH"
+        IMAGE_NAME = "venkatasai9876/ttrend"
+        VERSION    = "2.0.${BUILD_NUMBER}"
+    }
     stages {
-        stage("build"){
+        stage("Build") {
             steps {
-                 echo "----------- build started ----------"
+                echo "----------- Build Started ----------"
                 sh 'mvn clean deploy -Dmaven.test.skip=true'
-                 echo "----------- build complted ----------"
+                echo "----------- Build Completed ----------"
             }
         }
-        stage("test"){
-            steps{
-                echo "----------- unit test started ----------"
+        stage("Test") {
+            steps {
+                echo "----------- Unit Test Started ----------"
                 sh 'mvn surefire-report:report'
-                 echo "----------- unit test Complted ----------"
+                echo "----------- Unit Test Completed ----------"
             }
         }
-		stage("Docker Build") {
-steps {
-script {
-echo '<--------------- Docker Build Started --------------->'
-app = docker.build("${env.IMAGE_NAME}:${env.VERSION}")
-echo '<--------------- Docker Build Ends --------------->'
-}
-}
-}
+        stage("Docker Build") {
+            steps {
+                script {
+                    echo '<--------------- Docker Build Started --------------->'
+                    
+                    // Get short Git SHA for traceable tag
+                    def gitSha = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.GIT_SHA = gitSha
+                    
+                    // Build Docker image with VERSION tag
+                    app = docker.build("${env.IMAGE_NAME}:${env.VERSION}")
+                    
+                    echo '<--------------- Docker Build Completed --------------->'
+                }
+            }
+        }
+        stage("Docker Publish") {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'
 
-stage("Docker Publish") {
-steps {
-script {
-echo '<--------------- Docker Publish Started --------------->'
+                    docker.withRegistry('', 'dh') {
+                        // Push VERSION tag
+                        app.push("${env.VERSION}")
 
-  docker.withRegistry('', 'dh') {
-    app.push()
-    app.push("latest")   // optional
-  }
+                        // Push latest tag
+                        app.push("latest")
 
-  echo '<--------------- Docker Publish Ended --------------->'
-}
+                        // Push Git SHA tag for traceability
+                        app.push("${env.GIT_SHA}")
+                    }
 
+                    echo '<--------------- Docker Publish Completed --------------->'
+                }
+            }
+        }
+    }
 }
-}
-		
-		}
-		}
-		
