@@ -22,7 +22,31 @@ environment {
                  echo "----------- unit test Complted ----------"
             }
         }
-		
+		stage("Docker Build") {
+steps {
+script {
+echo '<--------------- Docker Build Started --------------->'
+app = docker.build("${imageName}:${version}")
+echo '<--------------- Docker Build Ends --------------->'
+}
+}
+}
+
+stage("Docker Publish") {
+steps {
+script {
+echo '<--------------- Docker Publish Started --------------->'
+
+  docker.withRegistry('https://hub.docker.com/repositories/venkatasai9876', 'dh') {
+    app.push()
+    app.push("latest")   // optional
+  }
+
+  echo '<--------------- Docker Publish Ended --------------->'
+}
+
+}
+}
 		
 		}
 		}
