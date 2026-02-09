@@ -6,6 +6,8 @@ pipeline {
     }
 environment {
     PATH = "/opt/apache-maven-3.9.12/bin:$PATH"
+	IMAGE_NAME = "venkatasai9876/ttrend"
+	VERSION = "2.0.${BUILD_NUMBER}"
 }
     stages {
         stage("build"){
