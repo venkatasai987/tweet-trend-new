@@ -39,7 +39,7 @@ steps {
 script {
 echo '<--------------- Docker Publish Started --------------->'
 
-  docker.withRegistry('https://hub.docker.com', 'dh') {
+  docker.withRegistry('https://index.docker.io/v1/', 'dh') {
     app.push()
     app.push("latest")   // optional
   }
