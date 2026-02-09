@@ -28,7 +28,7 @@ environment {
 steps {
 script {
 echo '<--------------- Docker Build Started --------------->'
-app = docker.build("${imageName}:${version}")
+app = docker.build("${env.IMAGE_NAME}:${env.VERSION}")
 echo '<--------------- Docker Build Ends --------------->'
 }
 }
@@ -39,7 +39,7 @@ steps {
 script {
 echo '<--------------- Docker Publish Started --------------->'
 
-  docker.withRegistry('https://hub.docker.com/repositories/venkatasai9876', 'dh') {
+  docker.withRegistry('https://hub.docker.com', 'dh') {
     app.push()
     app.push("latest")   // optional
   }
