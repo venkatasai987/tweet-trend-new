@@ -45,7 +45,7 @@ pipeline {
                 script {
                     echo '<--------------- Docker Publish Started --------------->'
 
-                    docker.withRegistry('', 'dh') {
+                    docker.withRegistry('', 'docker') {
                         // Push VERSION tag
                         app.push("${env.VERSION}")
 
